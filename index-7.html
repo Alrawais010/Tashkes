@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f5d3a">
+<title>تشخيص</title>
+<style>
+:root{--bg:#f4f1e8;--card:#fffdf7;--ink:#2a2a24;--mut:#6d6a5e;--pri:#2f5d3a;--pri2:#e3ecdf;--line:#e2ddcc;--red:#b3261e;--red2:#fbe4e1;--amb:#a35f00;--amb2:#fdf0d8;--blu:#1f5c8f;--blu2:#e2eef8;--grn:#2e7d32;--grn2:#e3f1e4}
+@media (prefers-color-scheme:dark){:root{--bg:#171a16;--card:#21251f;--ink:#ecebe4;--mut:#a9a796;--pri:#8cc49a;--pri2:#26352a;--line:#34392f;--red:#ff8a80;--red2:#3a1f1d;--amb:#ffc366;--amb2:#3a2d14;--blu:#8cc4f0;--blu2:#1b2c3b;--grn:#8fd694;--grn2:#1e3121}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",Tahoma,sans-serif;font-size:17px;line-height:1.6}
+header{position:sticky;top:0;z-index:5;background:var(--pri);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;gap:10px}
+@media (prefers-color-scheme:dark){header{background:#24402b}}
+header h1{margin:0;font-size:22px;flex:1}
+header button{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:10px;padding:8px 12px;font-size:15px;font-family:inherit}
+main{max-width:760px;margin:0 auto;padding:14px 16px 120px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:16px}
+.tabs button.on{background:var(--pri);color:var(--card);border-color:var(--pri)}
+.hint{color:var(--mut);font-size:15px;margin:4px 2px 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 10px;text-align:center;font-family:inherit;color:var(--ink);font-size:16px;font-weight:600;min-height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.tile .ic{font-size:30px;line-height:1}
+.tile:active,.opt:active{transform:scale(.98)}
+.trail{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{background:var(--pri2);color:var(--pri);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.q{font-size:20px;font-weight:700;margin:4px 2px 6px}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.opt{background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--pri);border-radius:14px;padding:14px;text-align:start;font-family:inherit;font-size:17px;color:var(--ink)}
+.opt small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);display:flex;gap:8px;z-index:5}
+.nav button{flex:1;padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:15px;font-weight:600}
+.nav button.alt{background:var(--amb2);color:var(--amb);border-color:transparent}
+.dx{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.dx h3{margin:0 0 6px;font-size:19px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.b{font-size:13px;font-weight:700;border-radius:8px;padding:2px 8px}
+.b.u3{background:var(--red2);color:var(--red)}.b.u2{background:var(--amb2);color:var(--amb)}.b.u1{background:var(--grn2);color:var(--grn)}
+.b.z{background:var(--red2);color:var(--red)}.b.nt{background:var(--blu2);color:var(--blu)}.b.c{background:var(--pri2);color:var(--pri)}
+.dx h4{margin:10px 0 2px;font-size:15px;color:var(--pri)}
+.dx p{margin:0}
+.dx details summary{cursor:pointer;font-weight:700;font-size:18px;list-style:none}
+.dx details summary::after{content:" ▾";color:var(--mut)}
+.banner{background:var(--amb2);color:var(--amb);border-radius:14px;padding:10px 14px;font-size:15px;margin-bottom:12px}
+.warn{background:var(--red2);color:var(--red);border-radius:14px;padding:10px 14px;font-size:15px;margin-bottom:12px;font-weight:600}
+input[type=search]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:16px;margin-bottom:12px}
+.foot{color:var(--mut);font-size:13px;text-align:center;margin-top:20px}
+.ed{display:flex;gap:4px;margin-top:8px;justify-content:center;flex-wrap:wrap}
+.ed button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 9px;font-size:14px;font-family:inherit}
+.ed .del,.wide.del{color:var(--red)}
+.tile.add,.opt.add{border-style:dashed;border-color:var(--pri);color:var(--pri);background:transparent}
+.opt.add{border-inline-start-width:1px;text-align:center;font-weight:600}
+.opt .to{display:block;color:var(--blu);font-size:13px;margin-top:2px}
+.editbar{background:var(--blu2);color:var(--blu);border-radius:12px;padding:8px 12px;font-size:14px;font-weight:600;margin-bottom:12px}
+.mini{border:1px solid var(--line);background:var(--card);color:var(--pri);border-radius:10px;padding:6px 12px;font-family:inherit;font-size:14px;font-weight:600;margin-bottom:4px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:var(--card);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 16px)}
+.sheet h3{margin:0 0 6px}
+.sheet label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px;color:var(--mut)}
+.sheet input:not([type=checkbox]),.sheet textarea,.sheet select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px}
+.sheet .ck{display:flex;align-items:center;gap:8px;color:var(--ink);font-weight:500;margin:8px 0}
+.sheet .ck input{width:20px;height:20px}
+.ms{max-height:38vh;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:0 10px;margin-top:6px}
+.mbtn{display:flex;gap:8px;margin-top:18px}
+.mbtn button,.wide{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;font-weight:600}
+.mbtn .ok{background:var(--pri);color:var(--card);border-color:var(--pri)}
+.wide{display:block;width:100%;margin-bottom:8px;text-align:center}
+header button.on{background:#fff;color:#2f5d3a}
+</style>
+</head>
+<body>
+<header><h1>🩺 تشخيص</h1><button id="editBtn">✏️ تعديل</button><button id="setBtn">⚙️</button><button id="homeBtn">🏠</button></header>
+<main id="app"></main>
+<div class="nav" id="nav"></div>
+<script>
+// ===== الأعراض الأولى والأسئلة =====
+// كل خيار: [النص, الهدف] — الهدف: اسم سؤال، أو اسم مرض، أو قائمة أمراض (تشخيص تفريقي)
+const START0=[
+ ['d','💩','إسهال'],
+ ['r','😮‍💨','سعال أو صعوبة تنفس'],
+ ['f','🌡️','حرارة وخمول وترك الأكل'],
+ ['l','🦶','عرج أو صعوبة المشي'],
+ ['m','👄','تقرحات أو قشور في الفم'],
+ ['s','🐑','حكة أو تساقط الصوف'],
+ ['b','🎈','انتفاخ البطن أو مغص'],
+ ['a','🍼','إجهاض'],
+ ['n','🌀','أعراض عصبية'],
+ ['an','👁️','شحوب العين أو هزال'],
+ ['sd','⚠️','نفوق مفاجئ'],
+ ['u','🥛','مشاكل الضرع'],
+ ['lp','🔴','تورم أو خراج'],
+ ['e','👀','مشاكل العين'],
+ ['p','🤰','نعجة حامل آخر الحمل مريضة']
+];
+const N0={
+ d:{q:'كم عمر الحيوان المصاب بالإسهال؟',o:[
+  ['مولود عمره أقل من ٣ أسابيع','d_neo'],
+  ['حمل أو جدي من ٣ أسابيع إلى ٦ أشهر','d_young'],
+  ['بالغ','d_adult']]},
+ d_neo:{q:'كيف شكل الإسهال وحالة المولود؟',o:[
+  ['إسهال مائي أصفر أو أبيض مع جفاف (عين غائرة) وضعف','ecoli'],
+  ['إسهال فيه دم مع ألم بطن ونفوق سريع','lambdys'],
+  ['عمره ١–٣ أيام: لعاب يسيل، بطن منتفخ، ترك الرضاعة','watery'],
+  ['تورم في السرة أو المفاصل مع الإسهال','jointill']]},
+ d_young:{q:'ما الذي يرافق الإسهال؟',o:[
+  ['دم أو مخاط في الروث مع تعصّر وتلطخ الذيل وهزال','cocci'],
+  ['إسهال مزمن مع شحوب العين أو تورم تحت الفك',['hemonchus','worms','fluke']],
+  ['هزال وبطء نمو وصوف خشن بدون شحوب واضح',['worms','cocci']],
+  ['حيوان سمين نفق فجأة أو تشنج بعد زيادة العلف','entero'],
+  ['حرارة مع إفرازات عين وأنف وتقرحات فم','ppr'],
+  ['بعد أكل شعير أو تمر أو خبز بكمية كبيرة مع خمول','acidosis']]},
+ d_adult:{q:'ما الذي يرافق الإسهال؟',o:[
+  ['حرارة مع إفرازات عين وأنف وتقرحات فم','ppr'],
+  ['حرارة ورائحة كريهة وأحياناً دم، مع نفوق أو إجهاض','salmonella'],
+  ['إسهال مزمن مع شحوب العين أو تورم تحت الفك',['hemonchus','fluke','worms']],
+  ['بعد أكل شعير أو تمر أو خبز بكمية كبيرة، مع خمول وعرج','acidosis'],
+  ['هزال مستمر رغم الأكل الجيد عند الكبار',['johnes','worms','teeth']],
+  ['إسهال لين خفيف والحيوان نشيط بعد تغيير العلف أو أكل أخضر كثير','diet'],
+  ['ظهر فجأة في عدة حيوانات بعد مرعى أو علف جديد','poison']]},
+
+ r:{q:'هل الحيوان عنده حرارة؟',h:'الحرارة الطبيعية من ٣٨٫٥ إلى ٣٩٫٥ م. فوق ٤٠ تعتبر حمّى. إذا لا يوجد ميزان: الحيوان خامل ولا يأكل وأذناه حارتان.',o:[
+  ['نعم، حرارة وخمول','r_fev'],
+  ['لا، والحيوان يأكل تقريباً','r_nof']]},
+ r_fev:{q:'ما الذي يرافق السعال أو صعوبة التنفس؟',o:[
+  ['إفرازات أنف وسعال بعد نقل أو برد أو ازدحام','pasteurella'],
+  ['إفرازات عين وأنف صديدية مع تقرحات فم وإسهال','ppr'],
+  ['ماعز: سعال مؤلم وتنفس بفم مفتوح ونفوق عدة رؤوس','ccpp'],
+  ['تورم الوجه والشفاه ولسان مزرق مع عرج','bluetongue'],
+  ['بثور وحبوب على الجلد الخالي من الصوف','pox'],
+  ['لهث بفم مفتوح في الحر الشديد أو بعد النقل نهاراً','heat']]},
+ r_nof:{q:'ما شكل المشكلة؟',o:[
+  ['سعال مزمن خاصة عند الحركة والحيوان يأكل','lungworm'],
+  ['عطاس وإفرازات أنف وهز الرأس وفرك الأنف','oestrus'],
+  ['صعوبة تنفس وهزال يزداد ببطء عند الكبار','opp'],
+  ['صعوبة تنفس مع انتفاخ في البطن','b']]},
+
+ f:{q:'ما العرض الأوضح مع الحرارة والخمول؟',o:[
+  ['مع إسهال','d'],
+  ['مع سعال أو إفرازات أنف','r'],
+  ['مع تقرحات أو قشور في الفم','m'],
+  ['مع عرج','l'],
+  ['نعجة حامل في آخر الحمل','p'],
+  ['نعجة بعد الولادة بأيام مع ضرع منتفخ أو إفرازات مهبلية كريهة',['mastitis','metritis']],
+  ['حرارة بدون علامة واضحة، مع وجود قراد أو شحوب أو اصفرار','tickfever'],
+  ['حرارة مع موجة إجهاض ونفوق مواليد بعد أمطار وبعوض','rvf'],
+  ['تورم في الفخذ أو الكتف فيه فرقعة غاز','blackleg']]},
+
+ l:{q:'كيف يبدو العرج؟',o:[
+  ['رائحة نتنة بين الأظلاف وتآكل الحافر','footrot'],
+  ['احمرار ورطوبة بين الأظلاف بدون رائحة قوية','scald'],
+  ['رجل واحدة: تورم حار مؤلم مع صديد','footabscess'],
+  ['عدة حيوانات تعرج مع تقرحات فم وسيلان لعاب','fmd'],
+  ['حملان صغيرة متيبسة لا تقدر تقوم أو تمشي','wmd'],
+  ['تورم المفاصل في المواليد (الركبة أو العرقوب)','jointill'],
+  ['عرج في أكثر من رجل بعد أكل شعير كثير','acidosis'],
+  ['تورم في الفخذ أو الكتف فيه فرقعة غاز مع حرارة','blackleg'],
+  ['احمرار حول أعلى الحافر مع تورم الوجه','bluetongue'],
+  ['عرج مع التهاب ضرع والتهاب عيون في القطيع','agalactia']]},
+
+ m:{q:'كيف تبدو التقرحات؟',o:[
+  ['قشور سميكة على الشفاه، غالباً بالصغار، والحيوان نشيط','orf'],
+  ['بثور تتحول قروحاً في الفم واللسان مع لعاب وعرج','fmd'],
+  ['تقرحات فم مع إفرازات عين وأنف وإسهال وحرارة','ppr'],
+  ['تورم الشفاه والوجه ولسان مزرق مع حرارة','bluetongue'],
+  ['بثور على الشفاه والجلد الخالي من الصوف مع حرارة','pox']]},
+
+ s:{q:'كيف تبدو مشكلة الجلد؟',o:[
+  ['حكة شديدة، يحك ويعض صوفه، تساقط مع قشور رطبة','scab'],
+  ['حكة خفيفة مع قمل أو قراد ظاهر','lice'],
+  ['بقع دائرية رمادية بلا صوف خاصة على الرأس','ringworm'],
+  ['حبوب وبثور على الجلد الخالي من الصوف مع حرارة','pox'],
+  ['قشور وتقرحات حول الفم والأنف','m'],
+  ['جرح أو صوف متسخ فيه دود (يرقات)','myiasis'],
+  ['كبير بالعمر: حكة مزمنة شديدة مع رجفة وعدم توازن','scrapie']]},
+
+ b:{q:'ما الذي يرافق الانتفاخ أو المغص؟',o:[
+  ['انتفاخ الجهة اليسرى بعد أكل برسيم أخضر أو بقوليات','frothy'],
+  ['انتفاخ مع سيلان لعاب ومحاولة البلع (شيء عالق)','choke'],
+  ['بعد أكل شعير أو تمر أو خبز كثير: خمول، إسهال، عرج','acidosis'],
+  ['ذكر: يتعصر ليبول، قطرات بول أو دم، يركل بطنه','urolith'],
+  ['حمل صغير سمين: ألم بطن ونفوق سريع','entero']]},
+
+ a:{q:'متى حدث الإجهاض وما الذي رافقه؟',h:'⚠️ لا تلمس الجنين والمشيمة بيد عارية — بعض أسباب الإجهاض تنتقل للإنسان.',o:[
+  ['آخر الحمل مع احتباس المشيمة، والكبش قد تتورم خصيته','brucella'],
+  ['آخر ٢–٣ أسابيع من الحمل أو مواليد ضعيفة، والمشيمة متسخة بنية','chlamydia'],
+  ['أجنة متحنطة أو صغيرة وبعضها سليم، ويوجد قطط بالمكان','toxo'],
+  ['موجة إجهاض مع نفوق مواليد وحرارة بعد أمطار وبعوض','rvf'],
+  ['إجهاض مع مرض شديد بالحرارة أو الإسهال أو الرئة',['ppr','bluetongue','salmonella']],
+  ['إجهاضات متفرقة دون سبب واضح',['brucella','chlamydia','toxo','campy','qfever']]]},
+
+ n:{q:'كيف تبدو الأعراض العصبية؟',o:[
+  ['نعجة حامل في آخر الحمل','p'],
+  ['يدور في اتجاه واحد مع شلل جانب الوجه (أذن متدلية، لعاب)','listeria'],
+  ['يدور ببطء لأسابيع، رأس مائل، وفي المكان كلاب','gid'],
+  ['عمى مفاجئ، رأس مرفوع للسماء، يضغط رأسه على الجدار','pem'],
+  ['تيبس الجسم كله وذيل مرفوع وصعوبة فتح الفم بعد جرح أو خصي','tetanus'],
+  ['حيوان سمين يتشنج ويموت سريعاً بعد تغيير العلف','entero'],
+  ['سلوك عدواني غريب وسيلان لعاب وصعوبة بلع','rabies'],
+  ['حملان حديثة: رجفة وعدم توازن أو ضعف الأرجل الخلفية',['swayback','wmd']],
+  ['ظهر فجأة في عدة حيوانات بعد نبات أو علف أو مبيد','poison'],
+  ['نعجة بعد الولادة: ضعف ورجفة ثم رقود','hypoca']]},
+
+ an:{q:'ما الذي يرافق الشحوب أو الهزال؟',h:'افحص لون جفن العين الداخلي: الوردي طبيعي، الأبيض الشاحب فقر دم.',o:[
+  ['شحوب شديد مع تورم تحت الفك ونفوق في الحملان','hemonchus'],
+  ['شحوب أو اصفرار مع حرارة ووجود قراد','tickfever'],
+  ['شحوب وتورم تحت الفك في مرعى رطب أو قرب مياه راكدة','fluke'],
+  ['هزال مع إسهال مزمن في الصغار',['worms','cocci']],
+  ['هزال تدريجي عند الكبار رغم الأكل',['johnes','cla','opp']],
+  ['هزال والطعام يسقط من الفم وأسنان متآكلة أو مفقودة','teeth']]},
+
+ sd:{q:'ماذا لاحظت على الحيوان النافق أو قبل نفوقه؟',h:'⚠️ إذا يوجد نزيف من الفتحات: لا تفتح الجثة ولا تقترب منها.',o:[
+  ['نزيف دم داكن من الفم والأنف والشرج، والجثة لا تتيبس','anthrax'],
+  ['حيوان سمين في حالة جيدة بعد تغيير علف أو زيادة حبوب','entero'],
+  ['تورم في الفخذ أو الكتف فيه فرقعة غاز','blackleg'],
+  ['بعد أكل نبات معين أو التعرض لسم أو مبيد','poison'],
+  ['انتفاخ شديد في البطن','b'],
+  ['نفوق في الحر الشديد أو بعد عطش','heat'],
+  ['حملان صغيرة مع إسهال فيه دم','lambdys'],
+  ['حملان عمرها أسابيع، كانت تبدو سليمة (أحياناً بعد جهد)','wmd']]},
+
+ u:{q:'كيف يبدو الضرع؟',o:[
+  ['حار متورم مؤلم والحليب متغير (كتل أو ماء أو دم)','mastitis'],
+  ['بارد أزرق أو أسود والنعجة مريضة جداً','gangmast'],
+  ['التهاب ضرع مع التهاب مفاصل وعيون في القطيع','agalactia'],
+  ['قشور على الحلمات والرضيع على فمه قشور','orf'],
+  ['قلة الحليب وضرع قاسٍ بدون ألم',['mastitis','opp']]]},
+
+ lp:{q:'أين التورم وكيف يبدو؟',o:[
+  ['خراج في مكان الغدد (تحت الأذن، أمام الكتف، الفخذ) بصديد أخضر سميك','cla'],
+  ['تورم لين تحت الفك',['hemonchus','fluke']],
+  ['تورم بعد حقنة أو جرح','abscess'],
+  ['تورم في الفخذ أو الكتف فيه فرقعة غاز مع حرارة','blackleg'],
+  ['تورم السرة أو المفاصل عند المواليد','jointill'],
+  ['تورم الوجه والشفاه مع حرارة','bluetongue']]},
+
+ e:{q:'ما مشكلة العين؟',o:[
+  ['دموع واحمرار وبياض على القرنية في عدة حيوانات','pinkeye'],
+  ['إفرازات عين وأنف مع تقرحات فم وحرارة','ppr'],
+  ['عمى مفاجئ مع رأس مرفوع أو ضغط الرأس','pem'],
+  ['عمى عند نعجة حامل آخر الحمل','pregtox'],
+  ['مولود رموشه ملتفة للداخل والعين تدمع','entropion'],
+  ['التهاب عيون مع التهاب ضرع ومفاصل','agalactia']]},
+
+ p:{q:'ما حالة النعجة الحامل؟',o:[
+  ['لا تأكل، معزولة، مذهولة أو عمياء، تصطك أسنانها (غالباً بتوأم)','pregtox'],
+  ['ضعف ورجفة ومشي متعثر ثم رقود على صدرها','hypoca'],
+  ['كتلة حمراء تخرج من الفرج وتزيد عند الرقود','prolapse'],
+  ['أجهضت','a'],
+  ['حرارة وخمول','f']]}
+};
+
+// ===== الأمراض =====
+// u: ١ غير عاجل، ٢ يحتاج علاج سريع، ٣ طارئ | z: ينتقل للإنسان | nt: يُبلّغ عنه | c: معدٍ للقطيع
+const D0={
+ecoli:{n:'إسهال المواليد',u:3,c:1,s:'مواليد أعمارها أيام، إسهال مائي أصفر أو أبيض، جفاف (عين غائرة وجلد يبقى مرفوعاً إذا قرصته)، برودة وضعف.',a:'اعزل المولود وأدفئه، عوّض السوائل والأملاح بالفم، المضاد الحيوي بإشراف البيطري. الوقاية: رضاعة السرسوب أول ٦ ساعات، نظافة مكان الولادة، تحصين الأمهات.'},
+watery:{n:'الفم المائي (تسمم المواليد)',u:3,s:'حملان عمرها ١–٣ أيام، سيلان لعاب، خمول، انتفاخ البطن، ترك الرضاعة.',a:'حالة طارئة: البيطري فوراً، دفء وسوائل. الوقاية: السرسوب مبكراً ونظافة الحظيرة.'},
+lambdys:{n:'دوسنتاريا الحملان (كلوستريديا)',u:3,c:1,s:'حملان أقل من ٣ أسابيع، إسهال مدمم، ألم بطن، نفوق سريع.',a:'العلاج غالباً يتأخر، البيطري فوراً. الوقاية: تحصين الأمهات بلقاح الكلوستريديا المركب قبل الولادة بـ ٤–٦ أسابيع.'},
+cocci:{n:'الكوكسيديا',u:2,c:1,s:'حملان من ٣ أسابيع إلى ٦ أشهر، إسهال مائي ثم مخاطي أو مدمم، تعصّر، تلطخ الذيل، هزال، مع الازدحام والرطوبة.',a:'علاج المجموعة كلها بمضاد كوكسيديا بإشراف البيطري، تنظيف وتجفيف الحظيرة، منع تلوث الأكل والماء بالروث.'},
+worms:{n:'الديدان المعوية',u:1,c:1,s:'إسهال مزمن، هزال، صوف خشن، بطء نمو.',a:'فحص روث عند البيطري (عد البيض)، مضاد ديدان بجرعة حسب الوزن، غيّر نوع المضاد بين فترة وأخرى ولا تكثر منه حتى لا تقاومه الديدان.'},
+hemonchus:{n:'ديدان المعدة الحمراء (الهيمونكس)',u:3,c:1,s:'شحوب شديد للأغشية (جفن العين أبيض)، تورم تحت الفك، ضعف ونفوق خاصة الحملان، وقد لا يوجد إسهال.',a:'مضاد ديدان فعّال على الهيمونكس فوراً بإشراف البيطري، افحص لون جفن العين دورياً وعالج الشاحب منها.'},
+fluke:{n:'الديدان الكبدية (الفاشيولا)',u:2,s:'شحوب، تورم تحت الفك، هزال، في المراعي الرطبة وقرب المياه الراكدة.',a:'دواء خاص بالديدان الكبدية (ليس كل مضادات الديدان تقتلها) بإشراف البيطري، أبعد القطيع عن الأماكن الرطبة.'},
+ppr:{n:'طاعون المجترات الصغيرة',u:3,c:1,nt:1,s:'حرارة عالية، إفرازات عين وأنف صديدية، تقرحات ورائحة كريهة في الفم، إسهال، التهاب رئوي، نفوق عالٍ خاصة الصغار والماعز.',a:'اعزل فوراً واتصل بالبيطري، علاج داعم ومضاد حيوي للعدوى المرافقة، تحصين القطيع باللقاح.'},
+entero:{n:'التسمم المعوي (الإنتروتوكسيميا)',u:3,c:1,s:'نفوق مفاجئ لأسمن الحيوانات بعد زيادة حبوب أو تغيير علف أو مرعى خصب، تشنجات ورأس للخلف، أحياناً إسهال.',a:'تحصين القطيع كله بلقاح الكلوستريديا مع الجرعة المنشطة، قلل الحبوب وزد العلف الخشن مؤقتاً، وتدرّج دائماً في تغيير العلف.'},
+acidosis:{n:'الحماض (التخمة الحامضية)',u:3,s:'بعد أكل شعير أو تمر أو خبز بكمية كبيرة: خمول، ترك الأكل، إسهال حامضي، جفاف، عرج، رقود.',a:'حالة طارئة: أوقف الحبوب فوراً، قدّم تبن أو برسيم جاف، اتصل بالبيطري (قد يحتاج مضاد حموضة وسوائل). الوقاية: التدرج في الحبوب على ٢–٣ أسابيع.'},
+diet:{n:'إسهال غذائي',u:1,s:'إسهال لين، الحيوان نشيط ويأكل، بعد تغيير العلف أو أكل أخضر كثير.',a:'زد العلف الخشن الجاف وقلل الأخضر وتدرّج في التغيير. إذا ظهرت حرارة أو خمول فارجع وأعد التشخيص.'},
+johnes:{n:'مرض جونز (نظير السل)',u:1,c:1,s:'الكبار، هزال يزداد ببطء رغم الشهية، الإسهال غير دائم في الأغنام، ولا علاج له.',a:'فحص بيطري (دم أو روث)، استبعاد المصاب، شراء الحيوانات من قطعان سليمة.'},
+salmonella:{n:'السالمونيلا',u:3,c:1,z:1,s:'إسهال كريه مائي أحياناً بدم، حرارة، خمول، نفوق، وأحياناً إجهاض، غالباً بعد إجهاد أو نقل.',a:'اعزل، البيطري للمضاد الحيوي والسوائل، النظافة وغسل اليدين.'},
+pasteurella:{n:'الالتهاب الرئوي (الباستريلا)',u:2,c:1,s:'حرارة، سعال، إفرازات أنف، تنفس سريع، خمول، بعد إجهاد النقل أو البرد أو الازدحام أو سوء التهوية.',a:'مضاد حيوي مبكر بإشراف البيطري، تهوية جيدة بدون تيارات هواء، تقليل الازدحام، التحصين بلقاح الباستريلا.'},
+ccpp:{n:'ذات الجنب والرئة المعدي (في الماعز)',u:3,c:1,nt:1,s:'الماعز فقط: حرارة عالية، سعال مؤلم، تنفس صعب بفم مفتوح، نفوق كثير.',a:'اعزل فوراً، البيطري (بعض المضادات فعالة إذا بدأت مبكراً)، تحصين.'},
+bluetongue:{n:'اللسان الأزرق',u:2,nt:1,s:'حرارة، تورم الشفاه والوجه، سيلان لعاب وأنف، لسان مزرق أحياناً، عرج مع احمرار أعلى الحافر، في موسم الحشرات.',a:'لا ينتقل بالمخالطة بل بالبعوض الدقيق. علاج داعم وظل وأكل لين، مكافحة الحشرات، البيطري.'},
+pox:{n:'جدري الأغنام والماعز',u:3,c:1,nt:1,s:'حرارة، بقع حمراء تصير بثوراً ثم قشوراً على الأماكن الخالية من الصوف (الوجه، الأذن، تحت الذيل، الضرع)، نفوق في الصغار.',a:'اعزل فوراً، البيطري، علاج داعم ومضاد للعدوى المرافقة، تحصين القطيع.'},
+heat:{n:'الإجهاد الحراري (ضربة الشمس)',u:3,s:'لهث بفم مفتوح، تنفس سريع جداً، حرارة عالية، ضعف، رقود في الحر.',a:'حالة طارئة: ظل وماء بارد للشرب، رش الماء على الرأس والأرجل، تهوية، وتجنب النقل والتعب وقت الظهيرة.'},
+lungworm:{n:'الديدان الرئوية',u:1,c:1,s:'سعال مزمن خاصة مع الحركة، شهية جيدة، هزال خفيف، غالباً بدون حرارة.',a:'مضاد ديدان فعّال على الديدان الرئوية بإشراف البيطري.'},
+oestrus:{n:'دودة الأنف (النغف)',u:1,s:'عطاس، إفرازات أنف قد يكون فيها دم، هز الرأس وفرك الأنف، الحيوانات تخفض رؤوسها صيفاً هرباً من الذباب.',a:'مضاد طفيليات مناسب بإشراف البيطري (غالباً في الخريف).'},
+opp:{n:'الالتهابات الرئوية المزمنة (ميدي-فسنا والأورام الرئوية)',u:1,c:1,s:'الكبار: صعوبة تنفس تزداد ببطء وهزال لأشهر بدون حرارة، أحياناً سيلان أنف مائي غزير عند رفع الأرجل الخلفية، ضرع قاسٍ.',a:'لا علاج. فحص بيطري واستبعاد المصاب، الشراء من قطعان سليمة.'},
+orf:{n:'الأكثيما المعدية (قرحة الشفاه)',u:1,c:1,z:1,s:'قشور سميكة وتقرحات على الشفاه والأنف، أكثر في الحملان، قد تنتقل للحلمات، الحيوان غالباً نشيط، تشفى خلال ٣–٤ أسابيع.',a:'اعزل، نظف وطهر القشور، مضاد للعدوى المرافقة إن لزم، ساعد الحملان على الرضاعة. ارتدِ قفازات لأنها تنتقل للإنسان.'},
+fmd:{n:'الحمى القلاعية',u:3,c:1,nt:1,s:'حرارة، بثور تنفجر قروحاً في الفم واللسان وبين الأظلاف، سيلان لعاب، عرج، نفوق الصغار أحياناً.',a:'أبلغ البيطري فوراً، اعزل وأوقف حركة الحيوانات، علاج داعم، تحصين.'},
+footrot:{n:'تعفن الحافر (الحفاء)',u:2,c:1,s:'عرج، رائحة نتنة، تآكل وانفصال قرن الحافر بين الأظلاف، مع الرطوبة والطين.',a:'قص وتنظيف الحافر، حمام أقدام مطهر، مضاد حيوي بإشراف البيطري، تجفيف الأرض، عزل المصاب.'},
+scald:{n:'التهاب ما بين الأظلاف',u:1,c:1,s:'احمرار ورطوبة الجلد بين الأظلاف وعرج، بدون رائحة قوية أو تآكل.',a:'تجفيف الأرض، حمام أقدام، بخاخ مطهر موضعي.'},
+footabscess:{n:'خراج الحافر',u:2,s:'عرج شديد في رجل واحدة، تورم حار، صديد عند الضغط.',a:'البيطري لفتح الخراج وتصريفه، تنظيف، مضاد حيوي.'},
+wmd:{n:'العضلات البيضاء (نقص السيلينيوم وفيتامين هـ)',u:2,s:'حملان عمرها أسابيع، تيبس، صعوبة الوقوف والمشي، ظهر محدب، وقد يتأثر القلب فينفق فجأة.',a:'حقن سيلينيوم وفيتامين هـ بإشراف البيطري، وإعطاء الأمهات قبل الولادة.'},
+jointill:{n:'التهاب المفاصل والسرة في المواليد',u:2,s:'مواليد: مفاصل متورمة حارة، عرج، سرة متورمة أو فيها صديد، حرارة.',a:'مضاد حيوي مبكر بإشراف البيطري، تطهير السرة باليود عند الولادة، نظافة مكان الولادة، السرسوب.'},
+blackleg:{n:'الساق السوداء (كلوستريديا)',u:3,s:'تورم في الفخذ أو الكتف مع فرقعة غاز تحت الجلد، عرج، حرارة، نفوق سريع، بعد جروح أو خصي أو ولادة.',a:'حالة طارئة: البيطري فوراً، تحصين القطيع بلقاح الكلوستريديا المركب.'},
+scab:{n:'الجرب',u:2,c:1,s:'حكة شديدة، الحيوان يحك ويعض صوفه، تساقط صوف، قشور صفراء رطبة، ينتشر في القطيع.',a:'علاج القطيع كله (تغطيس أو حقن مضاد طفيليات، جرعتين) بإشراف البيطري، اعزل أي حيوان جديد.'},
+lice:{n:'القمل والقراد',u:1,c:1,s:'حكة خفيفة، صوف متقطع، قمل أو قراد ظاهر، وقد يسبب شحوباً.',a:'رش أو تغطيس بمبيد مناسب، تنظيف الحظائر وشقوقها لأن القراد يختبئ فيها.'},
+ringworm:{n:'القوباء الحلقية (الفطريات)',u:1,c:1,z:1,s:'بقع دائرية رمادية بلا صوف أو شعر وعليها قشور، غالباً الرأس والرقبة.',a:'علاج موضعي مضاد للفطريات، شمس وتهوية. ارتدِ قفازات لأنها تنتقل للإنسان.'},
+myiasis:{n:'تدويد الجروح',u:2,s:'جرح أو صوف متسخ بالروث فيه يرقات (دود)، رائحة، حكة، اضطراب.',a:'قص الصوف حول المكان، إزالة اليرقات، تطهير، رش طارد للذباب، وعلاج سبب اتساخ الصوف.'},
+scrapie:{n:'الراعوش (السكرابي)',u:1,nt:1,s:'الكبار: حكة شديدة مزمنة، فرك وعض، رجفة، عدم توازن، هزال، ولا علاج.',a:'أبلغ البيطري لأخذ عينة.'},
+frothy:{n:'النفاخ الرغوي',u:3,s:'انتفاخ الخاصرة اليسرى بسرعة بعد أكل برسيم أخضر أو بقوليات، ضيق تنفس، ألم.',a:'حالة طارئة: أبعده عن الأخضر، حركه وارفع مقدمته، اتصل بالبيطري (دواء مضاد للرغوة بالفم). البزل فقط بيد خبير عند الاختناق.'},
+choke:{n:'النفاخ الغازي (انسداد المريء)',u:3,s:'انتفاخ يسار، سيلان لعاب، محاولة البلع والسعال، شيء عالق (تمر، نوى، قطع علف).',a:'حالة طارئة: البيطري لتمرير أنبوب المعدة وإخراج الغاز وإزالة العائق.'},
+urolith:{n:'حصى المجاري البولية',u:3,s:'الذكور خاصة المعلوفة بحبوب كثيرة: يتعصر ليبول، قطرات أو دم، يركل بطنه، يهز ذيله.',a:'حالة طارئة: البيطري فوراً (الانسداد قد يفجر المثانة). الوقاية: ماء نظيف كثير، ملح في العلف، توازن الكالسيوم والفوسفور.'},
+pregtox:{n:'تسمم الحمل (الكيتوزية)',u:3,s:'نعجة في آخر ٦ أسابيع من الحمل غالباً بتوأم: ترك الأكل، عزلة، ذهول، عمى، اصطكاك الأسنان، رقود.',a:'حالة طارئة: البيطري (محاليل سكر)، قد يلزم توليد أو قيصرية. الوقاية: تغذية جيدة متدرجة في آخر الحمل بلا تسمين ولا تجويع.'},
+hypoca:{n:'نقص الكالسيوم (حمى الحليب)',u:3,s:'آخر الحمل أو بعد الولادة: ضعف، رجفة، مشي متعثر، رقود على الصدر، إمساك.',a:'حالة طارئة: البيطري لحقن الكالسيوم ببطء، والتحسن غالباً سريع.'},
+prolapse:{n:'انقلاب المهبل',u:2,s:'كتلة حمراء تخرج من الفرج في آخر الحمل وتزيد عند الرقود.',a:'نظفها وأرجعها بلطف، البيطري لتثبيتها. إذا تكرر فلا تبقها للتربية.'},
+metritis:{n:'التهاب الرحم',u:2,s:'بعد الولادة: إفرازات بنية كريهة، حرارة، ترك الأكل، غالباً بعد احتباس المشيمة.',a:'البيطري للمضاد الحيوي، ارتدِ قفازات.'},
+mastitis:{n:'التهاب الضرع',u:2,s:'نصف الضرع حار متورم مؤلم، حليب مائي أو فيه كتل أو دم، حرارة، والرضيع جائع.',a:'البيطري للمضاد الحيوي، تفريغ الضرع، نظافة الأرضية. المزمن قد يحتاج استبعاد.'},
+gangmast:{n:'التهاب الضرع الغنغريني',u:3,s:'الضرع بارد أزرق ثم أسود، النعجة مريضة جداً، وقد تنفق.',a:'حالة طارئة: البيطري فوراً، وغالباً يُفقد النصف المصاب.'},
+agalactia:{n:'الإجالاكتيا المعدية (الميكوبلازما)',u:2,c:1,nt:1,s:'التهاب ضرع وتوقف الحليب، التهاب مفاصل وعرج، التهاب عيون، حرارة، في عدة حيوانات.',a:'اعزل، البيطري لمضاد مناسب، تحصين.'},
+brucella:{n:'البروسيلا (الحمى المالطية)',u:3,c:1,z:1,nt:1,s:'إجهاض في آخر الحمل، احتباس المشيمة، تورم خصية الكبش، وأحياناً بدون أعراض.',a:'خطيرة على الإنسان: لا تلمس الأجنة والمشيمة بيد عارية، ادفنها مع الجير أو احرقها، لا تشرب الحليب إلا مغلياً. فحص دم للقطيع وتحصين الإناث الصغيرة.'},
+chlamydia:{n:'الإجهاض المتوطن (الكلاميديا)',u:2,c:1,z:1,s:'إجهاض في آخر ٢–٣ أسابيع أو مواليد ضعيفة أو ميتة، مشيمة متسخة بنية، يتكرر في الإناث الجديدة.',a:'البيطري للتأكيد وعلاج الحوامل المعرضة، اعزل المجهضة. خطير على النساء الحوامل.'},
+toxo:{n:'التوكسوبلازما',u:2,z:1,s:'إجهاض أو أجنة متحنطة صغيرة مع توأم سليم، ووجود قطط تلوث العلف.',a:'امنع القطط من مخازن العلف، البيطري. خطير على النساء الحوامل.'},
+campy:{n:'الكامبيلوباكتر',u:2,c:1,z:1,s:'موجة إجهاض في آخر الحمل أو مواليد ضعيفة، وقد تصاب النعجة بالتهاب رحم.',a:'البيطري للتأكيد، اعزل المجهضة.'},
+qfever:{n:'حمى كيو',u:2,z:1,nt:1,s:'إجهاض أو مواليد ضعيفة غالباً بدون أعراض أخرى، وتنتقل للإنسان بالغبار والإفرازات.',a:'قفازات وكمامة عند التوليد، تخلص آمن من المشيمة، البيطري.'},
+rvf:{n:'حمى الوادي المتصدع',u:3,c:1,z:1,nt:1,s:'موجات إجهاض، نفوق كثير للمواليد خلال أيام، حرارة، بعد أمطار غزيرة وانتشار البعوض.',a:'أبلغ البيطري فوراً. خطيرة على الإنسان: لا تلمس الدم والأجنة والمشيمة ولا تذبح المريض. مكافحة البعوض.'},
+listeria:{n:'الليستيريا (مرض الدوران)',u:3,z:1,s:'يدور في اتجاه واحد، شلل جانب الوجه (أذن متدلية، جفن، لعاب)، رأس مائل، غالباً بعد سيلاج فاسد.',a:'البيطري لمضاد حيوي مبكر، أبعد السيلاج الفاسد، اغسل يديك.'},
+gid:{n:'الدودة الدماغية (الدوار)',u:1,s:'يدور ببطء لأسابيع، رأس مائل، عمى من جهة، قد يلين عظم الجمجمة، وكلاب ترافق الغنم.',a:'جراحة عند البيطري أحياناً. الوقاية: علاج الكلاب من الديدان وعدم إطعامها رؤوس الأغنام النافقة.'},
+pem:{n:'نقص فيتامين ب١ (لين قشرة المخ)',u:3,s:'عمى مفاجئ، رأس مرفوع للسماء، ضغط الرأس على الجدار، رجفة، بعد زيادة حبوب أو تغيير علف.',a:'حالة طارئة: البيطري لحقن فيتامين ب١ (الثيامين) فوراً، والتحسن خلال ساعات إذا بدأ مبكراً.'},
+tetanus:{n:'الكزاز',u:3,s:'تيبس الجسم كله، ذيل مرفوع، أذنان منتصبتان، صعوبة فتح الفم، تشنج مع الصوت، بعد جرح أو خصي أو ولادة.',a:'حالة طارئة: البيطري، مكان هادئ مظلم. الوقاية: التحصين وتطهير أدوات الخصي.'},
+rabies:{n:'داء الكلب',u:3,z:1,nt:1,s:'تغير السلوك، عدوانية أو خمول، سيلان لعاب، صعوبة بلع، شلل، ونفوق خلال أيام.',a:'خطير جداً على الإنسان: لا تلمس فمه أو لعابه، اعزله، أبلغ البيطري فوراً. من تعرض لعضة أو لعاب يراجع المستشفى فوراً.'},
+swayback:{n:'ترنح الحملان (نقص النحاس)',u:2,s:'حملان حديثة أو عمر أسابيع: رجفة، عدم توازن، ضعف الأرجل الخلفية.',a:'البيطري. تصحيح النحاس في علف الأمهات بحذر لأن زيادة النحاس سامة للأغنام.'},
+poison:{n:'التسمم (نبات أو مادة)',u:3,s:'يظهر فجأة في عدة حيوانات بعد مرعى أو علف جديد أو مبيد أو سماد: رجفة، لعاب، إسهال، تشنج، نفوق.',a:'حالة طارئة: أبعد القطيع عن المصدر فوراً، البيطري، احتفظ بعينة من النبات أو العلف.'},
+anthrax:{n:'الجمرة الخبيثة',u:3,z:1,nt:1,s:'نفوق مفاجئ، نزف دم داكن لا يتجلط من الفم والأنف والشرج، الجثة لا تتيبس وتنتفخ بسرعة.',a:'خطيرة جداً: لا تفتح الجثة ولا تذبح، أبلغ البيطري فوراً، دفن عميق مع الجير أو حرق، تحصين القطيع.'},
+tickfever:{n:'أمراض الدم المنقولة بالقراد (الثايليريا والأنابلازما)',u:2,s:'حرارة، شحوب أو اصفرار، تضخم الغدد اللمفاوية، ضعف، مع وجود قراد.',a:'البيطري لفحص الدم والعلاج المناسب، مكافحة القراد.'},
+cla:{n:'الخراج الجبني (التهاب الغدد الجبني)',u:1,c:1,s:'خراجات في أماكن الغدد (تحت الأذن، أمام الكتف، الفخذ) بصديد أخضر سميك، وهزال لاحقاً.',a:'اعزل، افتح ونظف بعيداً عن القطيع واحرق الصديد، استبعد المزمن، طهر مقص القص.'},
+abscess:{n:'خراج عادي',u:1,s:'تورم موضعي بعد حقنة أو جرح ويلين لاحقاً.',a:'تصريف وتطهير، مضاد حيوي إن لزم، إبر نظيفة للحقن.'},
+pinkeye:{n:'التهاب العين المعدي',u:2,c:1,s:'دموع، احمرار، إغلاق العين، بياض أو زرقة في القرنية، في عدة حيوانات مع الغبار والذباب.',a:'البيطري لمرهم أو حقنة، ظل، مكافحة الذباب، عزل المصاب.'},
+entropion:{n:'انقلاب الجفن',u:1,s:'مولود رموشه ملتفة للداخل، دموع، التهاب.',a:'أرجع الجفن بإصبعك عدة مرات يومياً، أو البيطري لتثبيته.'},
+teeth:{n:'مشاكل الأسنان (كبر السن)',u:1,s:'هزال، الطعام يسقط من الفم، أسنان مفقودة أو متآكلة.',a:'علف ناعم مركز، أو الاستبعاد.'}
+};
+
+// ===== البيانات المحفوظة =====
+const KEY='tashkhees_data_v1';
+const clone=o=>JSON.parse(JSON.stringify(o));
+let START,N,D;
+function load(){
+ try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.START&&v.N&&v.D){START=v.START;N=v.N;D=v.D;return}}catch(e){}
+ START=clone(START0);N=clone(N0);D=clone(D0);
+}
+function gc(){ // حذف الأسئلة التي لم يعد يصل إليها أي عرض
+ const seen=new Set(),st=START.map(s=>s[0]);
+ while(st.length){const k=st.pop();if(seen.has(k)||!N[k])continue;seen.add(k);N[k].o.forEach(o=>{if(typeof o[1]==='string'&&N[o[1]])st.push(o[1])})}
+ Object.keys(N).forEach(k=>{if(!seen.has(k))delete N[k]});
+}
+function save(){gc();try{localStorage.setItem(KEY,JSON.stringify({START,N,D}))}catch(e){alert('تعذر الحفظ')}}
+load();
+let edit=false;
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const $=id=>document.getElementById(id);
+const isNative=()=>{const C=window.Capacitor;return !!(C&&C.isNativePlatform&&C.isNativePlatform())};
+
+// ===== العرض =====
+const AR='٠١٢٣٤٥٦٧٨٩';const ar=x=>String(x).replace(/\d/g,d=>AR[d]);
+const app=$('app'),nav=$('nav');
+let tab='diag';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function label(id){const s=START.find(x=>x[0]===id);return s?s[2]:''}
+function qName(k){const l=label(k);let t=(l?l+' — ':'')+N[k].q;return t.length>70?t.slice(0,70)+'…':t}
+function sortedDx(){return Object.keys(D).sort((a,b)=>D[a].n.localeCompare(D[b].n,'ar'))}
+function reach(t,seen=new Set()){
+ if(Array.isArray(t))return t.filter(k=>D[k]);
+ if(D[t])return [t];
+ if(!N[t]||seen.has(t))return [];
+ seen.add(t);let r=[];N[t].o.forEach(o=>r.push(...reach(o[1],seen)));
+ return [...new Set(r)];
+}
+function badges(d){
+ let h='<div class="badges">';
+ h+=d.u==3?'<span class="b u3">🚨 طارئ</span>':d.u==2?'<span class="b u2">⏱️ يحتاج علاج سريع</span>':'<span class="b u1">🟢 غير عاجل</span>';
+ if(d.c)h+='<span class="b c">🐑 معدٍ للقطيع</span>';
+ if(d.z)h+='<span class="b z">⚠️ ينتقل للإنسان</span>';
+ if(d.nt)h+='<span class="b nt">📢 يُبلّغ عنه للبيطري</span>';
+ return h+'</div>';
+}
+function dxCard(k,open){
+ const d=D[k];if(!d)return '';
+ const eb=edit?`<div class="ed"><button onclick="editDx('${k}')">✎ تعديل</button><button class="del" onclick="delDx('${k}')">🗑 حذف</button></div>`:'';
+ const body=`${badges(d)}<h4>العلامات المميزة</h4><p>${ar(esc(d.s))||'—'}</p><h4>ماذا تفعل</h4><p>${ar(esc(d.a))||'—'}</p>${eb}`;
+ if(open)return `<div class="dx"><h3>${ar(esc(d.n))}</h3>${body}</div>`;
+ return `<div class="dx"><details><summary>${ar(esc(d.n))}</summary><div style="margin-top:8px">${body}</div></details></div>`;
+}
+function parse(){
+ const h=location.hash.replace(/^#\/?/,'');
+ if(h==='lib'){tab='lib';return null}
+ tab='diag';
+ if(!h)return null;
+ const parts=h.split('/');let cur=parts[0];const trail=[label(cur)];
+ for(let i=1;i<parts.length;i++){
+  if(parts[i]==='x')return {cur,trail,unknown:true};
+  const node=N[cur];if(!node)break;const o=node.o[+parts[i]];if(!o)break;
+  trail.push(o[0]);cur=o[1];
+ }
+ return {cur,trail};
+}
+function go(h){if(location.hash.replace(/^#/,'')===h)render();else location.hash=h}
+function targetText(tg){
+ if(Array.isArray(tg))return ar(tg.length)+' احتمالات (تشخيص تفريقي)';
+ if(D[tg])return '→ مرض: '+esc(D[tg].n);
+ if(N[tg])return '→ سؤال: '+esc(N[tg].q);
+ return '→ غير موجود';
+}
+function render(){
+ const st=parse();window.scrollTo(0,0);
+ $('editBtn').classList.toggle('on',edit);
+ let h=`<div class="tabs"><button class="${tab=='diag'?'on':''}" onclick="go('')">🩺 التشخيص</button><button class="${tab=='lib'?'on':''}" onclick="go('lib')">📖 دليل الأمراض</button></div>`;
+ if(edit)h+=`<div class="editbar">✏️ وضع التعديل — كل تعديل يُحفظ تلقائياً في الجوال</div>`;
+ if(tab==='lib'){
+  if(edit)h+=`<button class="opt add" style="width:100%;margin-bottom:12px" onclick="editDx(null)">➕ إضافة مرض جديد</button>`;
+  h+=`<input type="search" id="qs" placeholder="ابحث عن مرض أو عرض…" oninput="filt()"><div id="lst"></div>`;
+  app.innerHTML=h;filt();nav.style.display='none';return;
+ }
+ if(!st){
+  h+=`<p class="hint">اختر العرض الأوضح الذي تراه على الحيوان، ثم أجب عن الأسئلة حتى تصل للتشخيص.</p><div class="grid">`;
+  START.forEach((s,i)=>{
+   h+=`<div class="tile" onclick="go('/${s[0]}')"><span class="ic">${esc(s[1])}</span>${ar(esc(s[2]))}`;
+   if(edit)h+=`<div class="ed" onclick="event.stopPropagation()"><button onclick="editStart(${i})">✎</button><button onclick="mvStart(${i},-1)">▲</button><button onclick="mvStart(${i},1)">▼</button><button class="del" onclick="delStart(${i})">🗑</button></div>`;
+   h+='</div>';
+  });
+  if(edit)h+=`<div class="tile add" onclick="editStart(-1)"><span class="ic">➕</span>عرض جديد</div>`;
+  h+=`</div><p class="foot">التطبيق مساعد للمربي ولا يغني عن الطبيب البيطري. عند الحالات الطارئة أو النفوق الجماعي اتصل بالبيطري فوراً.</p>`;
+  app.innerHTML=h;nav.style.display='none';return;
+ }
+ h+='<div class="trail">'+st.trail.map(t=>`<span class="chip">${ar(esc(t))}</span>`).join('<span style="color:var(--mut)">←</span>')+'</div>';
+ const base=location.hash.replace(/^#/,'').replace(/\/x$/,'');
+ const t=st.cur;
+ if(st.unknown){
+  const list=reach(t);
+  h+=`<div class="banner">${ar('لم تجد العرض؟ هذه كل الاحتمالات من هذه النقطة ('+list.length+'). اضغط على أي مرض لترى علاماته.')}</div>`;
+  list.forEach(k=>h+=dxCard(k,false));
+ }else if(N[t]){
+  const n=N[t];
+  h+=`<div class="q">${ar(esc(n.q))}</div>`;
+  if(edit)h+=`<button class="mini" onclick="editQ('${t}')">✎ تعديل السؤال</button>`;
+  if(n.h)h+=`<p class="hint">${ar(esc(n.h))}</p>`;
+  h+='<div class="opts">';
+  n.o.forEach((o,i)=>{
+   const tg=o[1];
+   const sub=edit?`<span class="to">${targetText(tg)}</span>`:(Array.isArray(tg)?`<small>${ar(tg.length)} احتمالات</small>`:'');
+   if(edit)h+=`<div class="opt" onclick="go('${base}/${i}')">${ar(esc(o[0]))}${sub}<div class="ed" onclick="event.stopPropagation()"><button onclick="editOpt('${t}',${i})">✎</button><button onclick="mvOpt('${t}',${i},-1)">▲</button><button onclick="mvOpt('${t}',${i},1)">▼</button><button class="del" onclick="delOpt('${t}',${i})">🗑</button></div></div>`;
+   else h+=`<button class="opt" onclick="go('${base}/${i}')">${ar(esc(o[0]))}${sub}</button>`;
+  });
+  if(edit)h+=`<button class="opt add" onclick="editOpt('${t}',-1)">➕ إضافة خيار</button>`;
+  else if(!n.o.length)h+=`<p class="hint">لا توجد خيارات بعد — اضغط ✏️ تعديل في الأعلى لإضافتها.</p>`;
+  h+='</div>';
+ }else if(Array.isArray(t)){
+  const l=t.filter(k=>D[k]);
+  h+=`<div class="banner">${ar('تشخيص تفريقي: '+l.length+' أمراض متقاربة الأعراض. قارن العلامات المميزة لكل مرض، والتأكيد عند البيطري بالفحص.')}</div>`;
+  l.forEach((k,i)=>h+=dxCard(k,i===0));
+ }else if(D[t]){
+  if(D[t].u==3)h+=`<div class="warn">🚨 حالة طارئة — اتصل بالبيطري الآن.</div>`;
+  h+=`<p class="hint">التشخيص الأقرب:</p>`+dxCard(t,true);
+ }else{
+  h+=`<p class="hint">هذا الخيار لم يعد موجوداً.</p>`;
+ }
+ app.innerHTML=h;
+ nav.style.display='flex';
+ const isQ=!st.unknown&&N[t];
+ nav.innerHTML=`<button onclick="history.back()">→ رجوع</button>`+(isQ?`<button class="alt" onclick="go('${base}/x')">لم أجد العرض</button>`:'')+`<button onclick="go('')">البداية</button>`;
+}
+function filt(){
+ const q=($('qs').value||'').trim();
+ const ks=sortedDx().filter(k=>!q||D[k].n.includes(q)||D[k].s.includes(q)||D[k].a.includes(q));
+ $('lst').innerHTML=`<p class="hint">${ar(ks.length)} مرض</p>`+ks.map(k=>dxCard(k,false)).join('');
+}
+
+// ===== نافذة التعديل =====
+const ov=document.createElement('div');ov.className='ov';document.body.appendChild(ov);
+ov.addEventListener('click',e=>{if(e.target===ov)closeM()});
+function modal(title,body,onOk){
+ ov.innerHTML=`<div class="sheet"><h3>${title}</h3>${body}<div class="mbtn">${onOk?'<button class="ok" id="mOk">حفظ</button>':''}<button id="mNo">${onOk?'إلغاء':'إغلاق'}</button></div></div>`;
+ ov.style.display='flex';
+ $('mNo').onclick=closeM;
+ if(onOk)$('mOk').onclick=()=>{if(onOk()!==false){closeM();save();render()}};
+}
+function closeM(){ov.style.display='none';ov.innerHTML=''}
+
+// الأعراض الأولى
+function editStart(i){
+ const s=i>=0?START[i]:null;
+ modal(s?'تعديل العرض':'عرض جديد',
+ `<label>الرمز (إيموجي)</label><input id="fI" maxlength="8" value="${s?esc(s[1]):'🩺'}">
+  <label>اسم العرض</label><input id="fN" value="${s?esc(s[2]):''}" placeholder="مثلاً: سيلان اللعاب">
+  <label>السؤال الذي يظهر بعد الضغط عليه</label><input id="fQ" value="${s&&N[s[0]]?esc(N[s[0]].q):''}" placeholder="ما الذي يرافق هذا العرض؟">`,
+ ()=>{
+  const nm=$('fN').value.trim(),q=$('fQ').value.trim()||'ما الذي يرافق هذا العرض؟',ic=$('fI').value.trim()||'🩺';
+  if(!nm){alert('اكتب اسم العرض');return false}
+  if(s){s[1]=ic;s[2]=nm;if(N[s[0]])N[s[0]].q=q;else N[s[0]]={q,o:[]}}
+  else{const id=uid('q');N[id]={q,o:[]};START.push([id,ic,nm])}
+ });
+}
+function mvStart(i,d){const j=i+d;if(j<0||j>=START.length)return;[START[i],START[j]]=[START[j],START[i]];save();render()}
+function delStart(i){if(!confirm('حذف العرض «'+START[i][2]+'» وكل الأسئلة التي تحته؟\n(الأمراض نفسها تبقى في دليل الأمراض)'))return;START.splice(i,1);save();render()}
+
+// السؤال
+function editQ(id){
+ const n=N[id];
+ modal('تعديل السؤال',`<label>نص السؤال</label><textarea id="fQ" rows="2">${esc(n.q)}</textarea>
+  <label>ملاحظة تحت السؤال (اختياري)</label><textarea id="fH" rows="3">${esc(n.h||'')}</textarea>`,
+ ()=>{const q=$('fQ').value.trim();if(!q){alert('اكتب السؤال');return false}n.q=q;const hh=$('fH').value.trim();if(hh)n.h=hh;else delete n.h});
+}
+
+// الخيارات
+function editOpt(nid,i){
+ const o=i>=0?N[nid].o[i]:null,tg=o?o[1]:null;
+ const type=!o?'new':Array.isArray(tg)?'multi':D[tg]?'dx':'node';
+ const ks=sortedDx();
+ const qOpts=Object.keys(N).filter(k=>k!==nid).map(k=>`<option value="${k}" ${tg===k?'selected':''}>${esc(qName(k))}</option>`).join('');
+ modal(o?'تعديل الخيار':'خيار جديد',
+ `<label>نص الخيار (العرض الذي يراه المربي)</label><textarea id="fT" rows="2">${o?esc(o[0]):''}</textarea>
+  <label>عند الضغط عليه يؤدي إلى</label>
+  <select id="fK" onchange="optPanel()">
+   <option value="new">سؤال جديد (أعراض أخرى)</option>
+   <option value="node">سؤال موجود</option>
+   <option value="dx">مرض واحد (التشخيص)</option>
+   <option value="multi">عدة أمراض (تشخيص تفريقي)</option>
+  </select>
+  <div id="p_new"><label>نص السؤال الجديد</label><input id="fNQ" placeholder="ما الذي يرافق هذا العرض؟"></div>
+  <div id="p_node"><label>اختر السؤال</label><select id="fNode">${qOpts}</select></div>
+  <div id="p_dx"><label>اختر المرض</label><select id="fDx"><option value="__new">➕ مرض جديد…</option>${ks.map(k=>`<option value="${k}" ${tg===k?'selected':''}>${esc(D[k].n)}</option>`).join('')}</select></div>
+  <div id="p_multi"><label>اختر الأمراض المتقاربة</label><input id="fMs" placeholder="بحث…" oninput="msFilt()"><div class="ms" id="fM">${ks.map(k=>`<label class="ck" data-n="${esc(D[k].n)}"><input type="checkbox" value="${k}" ${Array.isArray(tg)&&tg.includes(k)?'checked':''}> ${esc(D[k].n)}</label>`).join('')}</div></div>`,
+ ()=>{
+  const txt=$('fT').value.trim();if(!txt){alert('اكتب نص الخيار');return false}
+  const k=$('fK').value;let target,openDx=null;
+  if(k==='new'){target=uid('q');N[target]={q:$('fNQ').value.trim()||'ما الذي يرافق هذا العرض؟',o:[]}}
+  else if(k==='node'){target=$('fNode').value;if(!target){alert('لا توجد أسئلة أخرى');return false}}
+  else if(k==='dx'){target=$('fDx').value;if(target==='__new'){target=uid('x');D[target]={n:txt,u:2,s:'',a:''};openDx=target}}
+  else{const c=[...document.querySelectorAll('#fM input:checked')].map(x=>x.value);
+   if(!c.length){alert('اختر مرضاً واحداً على الأقل');return false}
+   target=c.length===1?c[0]:c}
+  if(o){o[0]=txt;o[1]=target}else N[nid].o.push([txt,target]);
+  if(openDx)setTimeout(()=>editDx(openDx),60);
+ });
+ $('fK').value=type;optPanel();
+}
+function optPanel(){const k=$('fK').value;['new','node','dx','multi'].forEach(x=>$('p_'+x).style.display=x===k?'block':'none')}
+function msFilt(){const q=$('fMs').value.trim();document.querySelectorAll('#fM .ck').forEach(l=>l.style.display=!q||l.dataset.n.includes(q)?'flex':'none')}
+function mvOpt(nid,i,d){const a=N[nid].o,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
+function delOpt(nid,i){if(!confirm('حذف الخيار «'+N[nid].o[i][0]+'»؟'))return;N[nid].o.splice(i,1);save();render()}
+
+// الأمراض
+function editDx(k){
+ const d=k?D[k]:null;
+ modal(d?'تعديل المرض':'مرض جديد',
+ `<label>اسم المرض</label><input id="dN" value="${d?esc(d.n):''}">
+  <label>العلامات المميزة</label><textarea id="dS" rows="4">${d?esc(d.s):''}</textarea>
+  <label>ماذا تفعل</label><textarea id="dA" rows="4">${d?esc(d.a):''}</textarea>
+  <label>درجة الخطورة</label><select id="dU"><option value="3">🚨 طارئ</option><option value="2">⏱️ يحتاج علاج سريع</option><option value="1">🟢 غير عاجل</option></select>
+  <label class="ck"><input type="checkbox" id="dC" ${d&&d.c?'checked':''}> 🐑 معدٍ للقطيع</label>
+  <label class="ck"><input type="checkbox" id="dZ" ${d&&d.z?'checked':''}> ⚠️ ينتقل للإنسان</label>
+  <label class="ck"><input type="checkbox" id="dT" ${d&&d.nt?'checked':''}> 📢 يُبلّغ عنه للبيطري</label>`,
+ ()=>{
+  const n=$('dN').value.trim();if(!n){alert('اكتب اسم المرض');return false}
+  const o={n,s:$('dS').value.trim(),a:$('dA').value.trim(),u:+$('dU').value};
+  if($('dC').checked)o.c=1;if($('dZ').checked)o.z=1;if($('dT').checked)o.nt=1;
+  D[k||uid('x')]=o;
+ });
+ $('dU').value=String(d?d.u||2:2);
+}
+function delDx(k){
+ if(!confirm('حذف مرض «'+D[k].n+'»؟\nسيُحذف أيضاً من كل الأسئلة المرتبط بها.'))return;
+ delete D[k];
+ Object.values(N).forEach(n=>{n.o=n.o.map(o=>{
+  if(Array.isArray(o[1])){const a=o[1].filter(x=>x!==k);return a.length?[o[0],a.length===1?a[0]:a]:null}
+  return o[1]===k?null:o}).filter(Boolean)});
+ save();
+ const h=location.hash.replace(/^#/,'');
+ if(h&&h!=='lib'&&h.split('/').length>2)go(h.replace(/\/[^/]*$/,''));else render();
+}
+
+// ===== الإعدادات والنسخ الاحتياطي =====
+function settings(){
+ modal('⚙️ الإعدادات',`<p class="hint">${ar('الأعراض الأولى: '+START.length+' • الأسئلة: '+Object.keys(N).length+' • الأمراض: '+Object.keys(D).length)}</p>
+  <button class="wide" onclick="backup()">💾 حفظ نسخة احتياطية</button>
+  <button class="wide" onclick="$('fImp').click()">📂 استرجاع نسخة</button>
+  <input type="file" id="fImp" accept=".json,application/json" style="display:none" onchange="restore(this)">
+  <button class="wide del" onclick="resetAll()">↩️ إرجاع المحتوى الأصلي</button>
+  <p class="hint">الإرجاع يحذف كل إضافاتك وتعديلاتك، فاحفظ نسخة احتياطية قبله.</p>`,null);
+}
+async function backup(){
+ const body=JSON.stringify({app:'tashkhees',v:1,START,N,D});
+ const t=new Date(),p=n=>String(n).padStart(2,'0');
+ const name='tashkhees-'+t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate())+'.json';
+ if(isNative()){
+  const F=window.Capacitor.Plugins.Filesystem;
+  const w=n=>F.writeFile({path:'Tashkhees/'+n,data:body,directory:'DOCUMENTS',encoding:'utf8',recursive:true});
+  try{try{await w(name)}catch(e){await w(name.replace('.json','-'+Date.now().toString(36).slice(-4)+'.json'))}
+   alert('تم حفظ النسخة في الملفات: مجلد Documents ثم Tashkhees')}
+  catch(e){alert('تعذر الحفظ: '+(e.message||e))}
+ }else{
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();
+ }
+}
+function restore(inp){
+ const f=inp.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const v=JSON.parse(r.result);
+  if(!v.START||!v.N||!v.D)throw 0;
+  if(!confirm('استرجاع هذه النسخة؟ سيستبدل المحتوى الحالي.'))return;
+  START=v.START;N=v.N;D=v.D;save();closeM();go('');alert('تم الاسترجاع')}
+  catch(e){alert('الملف غير صالح')}};
+ r.readAsText(f);
+}
+function resetAll(){
+ if(!confirm('إرجاع المحتوى الأصلي وحذف كل تعديلاتك؟'))return;
+ try{localStorage.removeItem(KEY)}catch(e){}
+ load();closeM();go('');
+}
+
+$('homeBtn').onclick=()=>go('');
+$('setBtn').onclick=settings;
+$('editBtn').onclick=()=>{edit=!edit;render()};
+window.addEventListener('hashchange',render);
+render();
+
+</script>
+</body>
+</html>

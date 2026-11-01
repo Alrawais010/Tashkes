@@ -28,7 +28,7 @@ jobs:
           ID="com.alrawais010.$(echo "$REPO" | tr 'A-Z' 'a-z' | tr -cd 'a-z0-9')"
           B="$RUNNER_TEMP/build"
           mkdir -p "$B/www"
-          rsync -a --exclude '.git' --exclude '.github' ./ "$B/www/"
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'icon.png' ./ "$B/www/"
           cd "$B"
           npm init -y
           npm i @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/filesystem@7 @capacitor/share@7
@@ -36,6 +36,16 @@ jobs:
           npx cap add android
           npx cap sync android
           cd android
+          if [ -f "$GITHUB_WORKSPACE/icon.png" ]; then
+            command -v convert >/dev/null || sudo apt-get install -y imagemagick
+            R=app/src/main/res
+            for d in mdpi:48:108 hdpi:72:162 xhdpi:96:216 xxhdpi:144:324 xxxhdpi:192:432; do
+              n=${d%%:*}; r=${d#*:}; s=${r%%:*}; f=${r#*:}
+              convert "$GITHUB_WORKSPACE/icon.png" -resize ${s}x${s} "$R/mipmap-$n/ic_launcher.png"
+              cp "$R/mipmap-$n/ic_launcher.png" "$R/mipmap-$n/ic_launcher_round.png"
+              convert "$GITHUB_WORKSPACE/icon.png" -resize ${f}x${f} "$R/mipmap-$n/ic_launcher_foreground.png"
+            done
+          fi
           sed -i "s/versionCode 1/versionCode $GITHUB_RUN_NUMBER/" app/build.gradle
           chmod +x gradlew
           KS="$HOME/.android/debug.keystore"
